@@ -1,53 +1,38 @@
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+
 interface RiskBadgeProps {
-  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  level: RiskLevel
+  score?: number
 }
 
-const RISK_CONFIG = {
-  LOW: {
-    label: 'LOW',
-    color: 'text-terminal-green border-terminal-green',
-    bg: 'bg-terminal-green/10',
-    glow: '',
-  },
-  MEDIUM: {
-    label: 'MEDIUM',
-    color: 'text-terminal-amber border-terminal-amber',
-    bg: 'bg-terminal-amber/10',
-    glow: '',
-  },
-  HIGH: {
-    label: 'HIGH',
-    color: 'text-terminal-red border-terminal-red',
-    bg: 'bg-terminal-red/10',
-    glow: 'glow-red',
-  },
-  CRITICAL: {
-    label: 'CRITICAL',
-    color: 'text-terminal-red border-terminal-red',
-    bg: 'bg-terminal-red/20',
-    glow: 'glow-red',
-  },
+const RISK_CONFIG: Record<RiskLevel, { dot: string; text: string; description: string }> = {
+  LOW:      { dot: 'bg-terminal-green',  text: 'text-terminal-green',  description: 'Minimal on-chain risk signals' },
+  MEDIUM:   { dot: 'bg-terminal-amber',  text: 'text-terminal-amber',  description: 'Some patterns warrant attention' },
+  HIGH:     { dot: 'bg-terminal-red',    text: 'text-terminal-red',    description: 'Multiple active risk indicators' },
+  CRITICAL: { dot: 'bg-terminal-red',    text: 'text-terminal-red',    description: 'Immediate red flags, avoid interaction' },
 }
 
-export function RiskBadge({ level }: RiskBadgeProps) {
+export function RiskBadge({ level, score }: RiskBadgeProps) {
   const cfg = RISK_CONFIG[level] ?? RISK_CONFIG.MEDIUM
 
   return (
-    <span
-      className={`
-        inline-flex items-center gap-1.5 px-2.5 py-0.5
-        text-[10px] font-mono font-bold tracking-widest uppercase
-        border rounded-sm ${cfg.color} ${cfg.bg} ${cfg.glow}
-      `}
-    >
-      <span className="w-1.5 h-1.5 rounded-full bg-current inline-block" />
-      RISK: {cfg.label}
+    <span className="inline-flex items-center gap-2 font-mono text-sm">
+      {score !== undefined && (
+        <span className="text-terminal-text font-bold">{score}/100</span>
+      )}
+      <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
+      <span className={`font-bold tracking-widest uppercase ${cfg.text}`}>{level}</span>
+      <span className="text-terminal-muted font-bold">{cfg.description}</span>
     </span>
   )
 }
 
-/** Parse [RISK: X] tags out of a text string and return the level */
-export function parseRiskLevel(text: string): RiskBadgeProps['level'] | null {
-  const match = text.match(/\[RISK:\s*(LOW|MEDIUM|HIGH|CRITICAL)\]/i)
-  return match ? (match[1].toUpperCase() as RiskBadgeProps['level']) : null
+/** Parse [RISK: LEVEL:SCORE] or [RISK: LEVEL] tags from a text string */
+export function parseRiskLevel(text: string): { level: RiskLevel; score?: number } | null {
+  const match = text.match(/\[RISK:\s*(LOW|MEDIUM|HIGH|CRITICAL)(?::(\d+))?\]/i)
+  if (!match) return null
+  return {
+    level: match[1].toUpperCase() as RiskLevel,
+    score: match[2] !== undefined ? parseInt(match[2], 10) : undefined,
+  }
 }

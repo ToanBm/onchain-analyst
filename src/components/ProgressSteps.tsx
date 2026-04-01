@@ -96,16 +96,6 @@ export function ProgressSteps({ steps, streaming, hasContent }: ProgressStepsPro
               </span>
             )}
 
-            {/* Divider line between steps */}
-            {i < allSteps.length - 1 && (
-              <div className={`
-                ml-auto w-8 h-px transition-colors duration-500
-                ${allSteps[i + 1].done || (allSteps[i + 1].name === 'analysis' && hasContent)
-                  ? 'bg-terminal-green/40'
-                  : 'bg-[var(--border-2)]'
-                }
-              `} />
-            )}
           </div>
         )
       })}

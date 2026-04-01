@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useChat } from '../hooks/useChat'
-import type { MppFetch } from '../hooks/useMppPayment'
+import type { Message } from '../hooks/useChat'
 import { MessageBubble } from './MessageBubble'
 import { DataCard } from './DataCard'
 
@@ -8,15 +7,17 @@ interface ChatWindowProps {
   pendingQuery?: string
   onQueryConsumed: () => void
   onWalletDetected: (addr: string) => void
-  mppFetch: MppFetch
   isReady: boolean
   setupError: string | null
+  messages: Message[]
+  isLoading: boolean
+  sendMessage: (text: string) => void
+  stopStreaming: () => void
 }
 
 const ETH_ADDRESS_RE = /0x[0-9a-fA-F]{40}/g
 
-export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, mppFetch, isReady, setupError }: ChatWindowProps) {
-  const { messages, isLoading, sendMessage, stopStreaming, clearMessages } = useChat(mppFetch, isReady)
+export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, isReady, setupError, messages, isLoading, sendMessage, stopStreaming }: ChatWindowProps) {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -58,40 +59,6 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, mp
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-[var(--bg)]">
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] bg-[var(--surface)]">
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
-            <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-          </div>
-          <span className="text-[11px] font-mono text-terminal-muted">analyst@tempo ~</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* MPP status indicator */}
-          <div className="flex items-center gap-1.5">
-            <div className={`w-1.5 h-1.5 rounded-full transition-colors ${setupError ? 'bg-terminal-red' : isReady ? 'bg-terminal-green' : 'bg-terminal-muted/40 animate-pulse'}`} />
-            <span className={`text-[10px] font-mono uppercase tracking-widest ${setupError ? 'text-terminal-red/80' : 'text-terminal-muted/60'}`}>
-              {setupError ? 'Wallet error' : isReady ? 'MPP ready' : 'Connecting…'}
-            </span>
-          </div>
-
-          <span className="text-[10px] font-mono text-terminal-muted/50 uppercase tracking-widest">
-            {messages.length} messages
-          </span>
-          {messages.length > 0 && (
-            <button
-              onClick={clearMessages}
-              className="text-[10px] font-mono text-terminal-muted hover:text-terminal-red transition-colors"
-            >
-              clear
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-1">
         {messages.length === 0 && (
@@ -129,60 +96,65 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, mp
 
       {/* Input area */}
       <div className="border-t border-[var(--border)] bg-[var(--surface)] px-5 py-4">
-        <div className="flex items-end gap-3">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={setupError ? `Wallet error: ${setupError}` : isReady ? 'Ask about a wallet… e.g. \'Analyze 0x… for risk\'' : 'Connecting wallet…'}
-              disabled={!isReady || !!setupError}
-              rows={1}
-              className="
-                w-full bg-[var(--bg)] border border-[var(--border-2)] rounded-lg
-                px-4 py-3 pr-12 text-sm font-mono text-terminal-text
-                placeholder-terminal-muted/40
-                focus:outline-none focus:border-terminal-green/40 focus:ring-1 focus:ring-terminal-green/15
-                resize-none min-h-[46px] max-h-[120px] overflow-y-auto
-                transition-colors leading-relaxed
-                disabled:opacity-40 disabled:cursor-not-allowed
-              "
-              style={{ height: 'auto' }}
-              onInput={(e) => {
-                const el = e.currentTarget
-                el.style.height = 'auto'
-                el.style.height = `${Math.min(el.scrollHeight, 120)}px`
-              }}
-            />
-            <div className="absolute right-3 bottom-3 text-[10px] font-mono text-terminal-muted/30">
-              ↵
-            </div>
-          </div>
+        <div className="relative">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={setupError ? `Wallet error: ${setupError}` : isReady ? 'Ask about a wallet… e.g. \'Analyze 0x… for risk\'' : 'Connecting wallet…'}
+            disabled={!isReady || !!setupError}
+            rows={1}
+            className="
+              w-full bg-[var(--bg)] border border-[var(--border-2)] rounded-lg
+              px-4 py-3 pr-12 text-sm font-mono text-terminal-text
+              placeholder-terminal-muted/40
+              focus:outline-none focus:border-terminal-green/40 focus:ring-1 focus:ring-terminal-green/15
+              resize-none min-h-[46px] max-h-[120px] overflow-y-auto
+              transition-colors leading-relaxed
+              disabled:opacity-40 disabled:cursor-not-allowed
+            "
+            style={{ height: 'auto' }}
+            onInput={(e) => {
+              const el = e.currentTarget
+              el.style.height = 'auto'
+              el.style.height = `${Math.min(el.scrollHeight, 120)}px`
+            }}
+          />
 
+          {/* Send / Stop button — inside the input */}
           {isLoading ? (
             <button
               onClick={stopStreaming}
               className="
-                px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wider
+                absolute right-2.5 bottom-2.5
+                p-1.5 rounded-md
                 bg-terminal-red/10 border border-terminal-red/30 text-terminal-red
-                rounded-lg hover:bg-terminal-red/20 transition-all shrink-0
+                hover:bg-terminal-red/20 transition-all
               "
+              title="Stop"
             >
-              ■ Stop
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="5" y="5" width="14" height="14" rx="2" />
+              </svg>
             </button>
           ) : (
             <button
               onClick={handleSend}
               disabled={!input.trim() || !isReady || !!setupError}
               className="
-                px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-wider
+                absolute right-2.5 bottom-2.5
+                p-1.5 rounded-md transition-all
                 bg-terminal-green/10 border border-terminal-green/30 text-terminal-green
-                rounded-lg hover:bg-terminal-green/20 hover:border-terminal-green/60
-                transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed
+                hover:bg-terminal-green/20 hover:border-terminal-green/60
+                disabled:opacity-30 disabled:cursor-not-allowed
               "
+              title="Send"
             >
-              Send →
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
             </button>
           )}
         </div>

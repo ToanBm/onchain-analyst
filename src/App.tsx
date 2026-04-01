@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react'
 import { ChatWindow } from './components/ChatWindow'
 import { WalletPanel } from './components/WalletPanel'
 import { useMppPayment } from './hooks/useMppPayment'
+import { useChat } from './hooks/useChat'
 import { WalletBar } from './components/WalletBar'
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
   const [recentWallets, setRecentWallets] = useState<string[]>([])
 
   const { mppFetch, isReady, setupError, walletAddress } = useMppPayment()
+  const { messages, isLoading, sendMessage, stopStreaming, clearMessages } = useChat(mppFetch, isReady)
 
   const handleWalletQuery = useCallback((addressOrQuery: string) => {
     const isAddress = /^0x[0-9a-fA-F]{40}$/.test(addressOrQuery.trim())
@@ -111,14 +113,21 @@ export default function App() {
           walletAddress={walletAddress}
           userLabel={user?.email?.address ?? 'anon'}
           onLogout={logout}
+          isReady={isReady}
+          setupError={setupError}
+          messageCount={messages.length}
+          onClear={clearMessages}
         />
         <ChatWindow
           pendingQuery={pendingQuery}
           onQueryConsumed={handleQueryConsumed}
           onWalletDetected={handleWalletDetected}
-          mppFetch={mppFetch}
           isReady={isReady}
           setupError={setupError}
+          messages={messages}
+          isLoading={isLoading}
+          sendMessage={sendMessage}
+          stopStreaming={stopStreaming}
         />
       </div>
     </div>

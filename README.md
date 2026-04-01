@@ -1,7 +1,7 @@
 # On-Chain Analyst Chatbot
 
-> AI-powered Ethereum wallet forensics with two payment modes:
-> **Free** (operator subsidises via Privy server wallet) or **Wallet** (user pays from their own Tempo wallet via MPP).
+> AI-powered Ethereum wallet forensics over a full MPP chain:
+> user's embedded wallet pays the API endpoint, which pays Anthropic and Alchemy — no API keys exposed to the browser.
 
 ## Stack
 
@@ -9,33 +9,29 @@
 |-------|-----------|
 | AI | Anthropic Claude (claude-sonnet-4-6) via MPP |
 | On-chain data | Alchemy Portfolio + NFT API via MPP |
-| Analytics | Dune Analytics SQL API via MPP |
+| Analytics | Dune Analytics (dev/MCP only — no MPP endpoint at runtime) |
 | Payments | mppx · Privy server wallet (free) or embedded wallet (paid) |
 | Auth | Privy (email, Google, Twitter, wallet) |
 | Frontend | React 18, Vite, Tailwind CSS |
 | Serverless | Vercel (api/chat.ts — free mode) |
 | State | Upstash Redis (MPP channel persistence across cold starts) |
 
-## Payment Modes
+## Payment Architecture
 
-### Free mode (default)
-The browser posts to the Vercel serverless function `/api/chat`. A Privy **server wallet** (funded with pathUSD by the operator) pays for all MPP calls. Users pay nothing.
-
-```
-Browser → POST /api/chat → Vercel serverless function
-  └─ Privy server wallet signs MPP payments
-  └─ Calls Anthropic, Alchemy, Dune via mppx
-  └─ Streams SSE back
-```
-
-### Wallet mode
-The browser runs the agent directly. The user's Privy **embedded wallet** pays for MPP calls via mppx.
+Every request flows through a full MPP chain — two MPP sessions, no API keys at runtime.
 
 ```
-Browser → mppx (user's embedded wallet)
-  └─ Calls Anthropic, Alchemy, Dune directly
-  └─ Streams response in-page
+Browser (user's Privy embedded wallet)
+  └─ [MPP session] → POST /api/chat   (0.001 USDC.e per request → operator)
+       └─ [MPP session] → Anthropic MPP proxy
+       └─ [MPP session] → Alchemy MPP gateway
 ```
+
+**Leg 1 — browser → `/api/chat`**
+The user's Privy embedded wallet (set up silently at login) pays the Vercel serverless function via mppx. A Tempo payment channel is opened on first request; subsequent requests deduct vouchers against the same channel deposit (`0.04 USDC.e`). Channel state is persisted in Upstash Redis so it survives Vercel cold starts.
+
+**Leg 2 — `/api/chat` → Anthropic + Alchemy**
+The operator's Privy server wallet pays both upstream services via mppx. Alchemy is authenticated with a SIWE token (generated from the server wallet, cached for 1 hour); Anthropic uses a direct API key passed to the MPP proxy.
 
 ## Quick Start
 

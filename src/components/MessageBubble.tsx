@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { parseRiskLevel, RiskBadge } from './RiskBadge'
 import type { Message } from '../hooks/useChat'
 import { ProgressSteps } from './ProgressSteps'
@@ -15,7 +16,7 @@ function renderContent(text: string) {
     <>
       {riskLevel && (
         <div className="mb-3">
-          <RiskBadge level={riskLevel} />
+          <RiskBadge level={riskLevel.level} score={riskLevel.score} />
         </div>
       )}
       {parts.map((part, i) => {
@@ -48,6 +49,14 @@ function renderContent(text: string) {
 
 export function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === 'user'
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
 
   if (isUser) {
     return (
@@ -71,7 +80,23 @@ export function MessageBubble({ message }: { message: Message }) {
         </div>
 
         {/* Bubble */}
-        <div className="agent-bubble rounded-lg px-4 py-3 text-sm font-mono leading-relaxed text-terminal-text">
+        <div className="agent-bubble relative rounded-lg px-4 py-3 text-sm font-mono leading-relaxed text-terminal-text">
+          {!message.streaming && message.content && (
+            <button
+              onClick={handleCopy}
+              title="Copy"
+              className="absolute top-2.5 right-2.5 text-terminal-muted/40 hover:text-terminal-green transition-colors"
+            >
+              {copied ? (
+                <span className="text-[10px] font-mono text-terminal-green">copied!</span>
+              ) : (
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" strokeWidth="2" />
+                </svg>
+              )}
+            </button>
+          )}
           {message.error ? (
             <span className="text-terminal-red text-xs">⚠ {message.error}</span>
           ) : (

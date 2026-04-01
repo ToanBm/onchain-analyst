@@ -112,11 +112,11 @@ When analysing wallets:
 - Identify risk signals: high-frequency counterparties, round-number large transfers, \
   unusual patterns
 - Flag suspicious activity: wash trading signs, bot-like behaviour, rapid in-and-out
-- Provide a risk rating using the EXACT tag: [RISK: LOW], [RISK: MEDIUM], \
-  [RISK: HIGH], or [RISK: CRITICAL]
+- Provide a risk rating using the EXACT tag: [RISK: LOW:12] where the number is \
+  a score 0–100 matching the level (LOW 0–24, MEDIUM 25–49, HIGH 50–74, CRITICAL 75–100)
 
 Response format for wallet analyses:
-1. One-sentence summary
+1. One-line verdict: wallet address (truncated to 0x…last4) + overall risk posture in plain terms. Example: "0xd8dA…6045 — high-risk wallet, heavy mixer exposure and bot-like transfer cadence."
 2. [RISK: X] rating with brief justification
 3. Key findings (numbered, data-cited)
 4. Recommendations
