@@ -102,7 +102,7 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={setupError ? `Wallet error: ${setupError}` : isReady ? 'Ask about a wallet… e.g. \'Analyze 0x… for risk\'' : 'Connecting wallet…'}
+            placeholder={setupError ? `Wallet error: ${setupError}` : isReady ? 'Analyze a wallet… e.g. 0x1234…' : 'Connecting…'}
             disabled={!isReady || !!setupError}
             rows={1}
             className="
