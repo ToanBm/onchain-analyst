@@ -10,9 +10,57 @@ interface WalletBarProps {
   setupError: string | null
   messageCount: number
   onClear: () => void
+  theme: 'dark' | 'light'
+  onThemeToggle: () => void
+  onMenuOpen: () => void
 }
 
-export function WalletBar({ walletAddress, userLabel, onLogout, isReady, setupError, messageCount, onClear }: WalletBarProps) {
+function SunIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5" strokeWidth="2" />
+      <line x1="12" y1="1" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" />
+      <line x1="12" y1="21" x2="12" y2="23" strokeWidth="2" strokeLinecap="round" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" strokeWidth="2" strokeLinecap="round" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" strokeWidth="2" strokeLinecap="round" />
+      <line x1="1" y1="12" x2="3" y2="12" strokeWidth="2" strokeLinecap="round" />
+      <line x1="21" y1="12" x2="23" y2="12" strokeWidth="2" strokeLinecap="round" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" strokeWidth="2" strokeLinecap="round" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function HamburgerIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <line x1="3" y1="6" x2="21" y2="6" strokeWidth="2" strokeLinecap="round" />
+      <line x1="3" y1="12" x2="21" y2="12" strokeWidth="2" strokeLinecap="round" />
+      <line x1="3" y1="18" x2="21" y2="18" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+export function WalletBar({
+  walletAddress,
+  userLabel,
+  onLogout,
+  isReady,
+  setupError,
+  messageCount,
+  onClear,
+  theme,
+  onThemeToggle,
+  onMenuOpen,
+}: WalletBarProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -28,62 +76,70 @@ export function WalletBar({ walletAddress, userLabel, onLogout, isReady, setupEr
     : null
 
   return (
-    <div className="flex items-center justify-between px-5 py-2 border-b border-[var(--border)] bg-[var(--surface)]">
-      {/* Terminal chrome */}
+    <div className="flex items-center justify-between px-3 md:px-5 py-2 border-b border-[var(--border)] bg-[var(--surface)] min-h-[40px]">
+      {/* Left: 3 dots + MPP status + message count */}
       <div className="flex items-center gap-3">
-        <div className="flex gap-1.5">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuOpen}
+          className="md:hidden p-1.5 rounded text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors tap-target flex items-center justify-center"
+          aria-label="Open menu"
+        >
+          <HamburgerIcon />
+        </button>
+
+        {/* Terminal chrome dots */}
+        <div className="hidden md:flex gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]" />
           <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
         </div>
-        <span className="text-[11px] font-mono text-terminal-muted">analyst@tempo ~</span>
-      </div>
 
-      {/* Right section */}
-      <div className="flex items-center gap-3">
         {/* MPP status */}
-        <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full transition-colors ${setupError ? 'bg-terminal-red' : isReady ? 'bg-terminal-green' : 'bg-terminal-muted/40 animate-pulse'}`} />
-          <span className={`text-[10px] font-mono uppercase tracking-widest ${setupError ? 'text-terminal-red/80' : 'text-terminal-muted/60'}`}>
+        <div className="hidden md:flex items-center gap-1.5">
+          <span className={`text-[10px] font-mono uppercase tracking-widest ${setupError ? 'text-[var(--red-a80)]' : 'text-[var(--muted-a60)]'}`}>
             {setupError ? 'Wallet error' : isReady ? 'MPP ready' : 'Connecting…'}
           </span>
+          <div className={`w-1.5 h-1.5 rounded-full transition-colors ${setupError ? 'bg-[var(--red)]' : isReady ? 'bg-[var(--green)]' : 'bg-[var(--muted-a40)] animate-pulse'}`} />
         </div>
 
-        <div className="w-px h-3 bg-[var(--border-2)]" />
-
         {/* Message count + clear */}
-        <span className="text-[10px] font-mono text-terminal-muted/50 uppercase tracking-widest">
-          {messageCount} messages
-        </span>
-        {messageCount > 0 && (
-          <button
-            onClick={onClear}
-            className="text-[10px] font-mono text-terminal-muted hover:text-terminal-red transition-colors"
-          >
-            clear
-          </button>
-        )}
+        <div className="hidden md:flex items-center gap-2">
+          <span className="text-[10px] font-mono text-[var(--muted-a50)] uppercase tracking-widest whitespace-nowrap">
+            {messageCount} messages
+          </span>
+          {messageCount > 0 && (
+            <button
+              onClick={onClear}
+              className="text-[10px] font-mono text-[var(--muted)] hover:text-[var(--red)] transition-colors"
+            >
+              clear
+            </button>
+          )}
+        </div>
+      </div>
 
-        <div className="w-px h-3 bg-[var(--border-2)]" />
+      {/* Right: user / wallet / theme / logout */}
+      <div className="flex items-center gap-2 md:gap-3 overflow-hidden">
 
-        {/* User identity */}
-        <span className="text-[11px] font-mono text-terminal-muted/50 hidden sm:block">
+        {/* User identity — desktop only */}
+        <span className="text-[11px] font-mono text-[var(--muted-a50)] hidden md:block truncate max-w-[120px]">
           {userLabel}
         </span>
 
         {walletAddress && (
           <>
-            <div className="w-px h-3 bg-[var(--border-2)]" />
+            <div className="hidden md:block w-px h-3 bg-[var(--border-2)]" />
 
-            {/* Embedded wallet address + copy */}
+            {/* Wallet address + copy */}
             <button
               onClick={handleCopy}
               title={walletAddress}
-              className="flex items-center gap-1.5 text-[11px] font-mono text-terminal-muted hover:text-terminal-green transition-colors"
+              className="hidden md:flex items-center gap-1.5 text-[11px] font-mono text-[var(--muted)] hover:text-[var(--green)] transition-colors"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-terminal-green/50 shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--green-a50)] shrink-0" />
               {copied ? (
-                <span className="text-terminal-green">copied!</span>
+                <span className="text-[var(--green)]">copied!</span>
               ) : (
                 <span>{short}</span>
               )}
@@ -93,13 +149,13 @@ export function WalletBar({ walletAddress, userLabel, onLogout, isReady, setupEr
               </svg>
             </button>
 
-            {/* Deposit link → Tempo bridge */}
+            {/* Deposit link */}
             <a
-              href={`${BRIDGE_URL}`}
+              href={BRIDGE_URL}
               target="_blank"
               rel="noopener noreferrer"
               title="Bridge USDC.e to your Tempo wallet"
-              className="text-[11px] font-mono text-terminal-muted hover:text-terminal-green transition-colors flex items-center gap-1"
+              className="hidden md:flex text-[11px] font-mono text-[var(--muted)] hover:text-[var(--green)] transition-colors items-center gap-1"
             >
               deposit
               <svg className="w-2.5 h-2.5 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,9 +169,21 @@ export function WalletBar({ walletAddress, userLabel, onLogout, isReady, setupEr
 
         <div className="w-px h-3 bg-[var(--border-2)]" />
 
+        {/* Theme toggle */}
+        <button
+          onClick={onThemeToggle}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="p-1.5 rounded text-[var(--muted)] hover:text-[var(--green)] hover:bg-[var(--surface-2)] transition-colors tap-target flex items-center justify-center"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+        </button>
+
+        <div className="w-px h-3 bg-[var(--border-2)]" />
+
         <button
           onClick={onLogout}
-          className="text-[11px] font-mono text-terminal-muted hover:text-terminal-red transition-colors"
+          className="text-[11px] font-mono text-[var(--muted)] hover:text-[var(--red)] transition-colors whitespace-nowrap"
         >
           logout
         </button>

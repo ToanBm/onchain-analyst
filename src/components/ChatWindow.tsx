@@ -63,10 +63,10 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-1">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-6 py-16">
-            <div className="font-display text-3xl font-bold text-terminal-green tracking-tight">
+            <div className="font-display text-3xl font-bold text-[var(--green)] tracking-tight">
               On-Chain Analyst
             </div>
-            <p className="text-sm font-mono text-terminal-muted max-w-md leading-relaxed">
+            <p className="text-sm font-mono text-[var(--muted)] max-w-md leading-relaxed">
               Ask me to analyze any Ethereum wallet for risk, portfolio composition,
               whale activity, or suspicious patterns. I'll pull live data from Alchemy
               to give you a forensic breakdown.
@@ -81,8 +81,8 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
                 <DataCard key={c.label} label={c.label} value={c.value} sub={c.sub} />
               ))}
             </div>
-            <div className="flex items-center gap-2 text-[11px] font-mono text-terminal-muted/50">
-              <div className="w-1.5 h-1.5 rounded-full bg-terminal-green/40" />
+            <div className="flex items-center gap-2 text-[11px] font-mono text-[var(--muted-a50)]">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--green-a40)]" />
               Powered by Anthropic Claude + Alchemy
             </div>
           </div>
@@ -95,7 +95,7 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
       </div>
 
       {/* Input area */}
-      <div className="border-t border-[var(--border)] bg-[var(--surface)] px-5 py-4">
+      <div className="border-t border-[var(--border)] bg-[var(--surface)] px-4 md:px-5 pt-4 input-safe-area">
         <div className="relative">
           <textarea
             ref={inputRef}
@@ -107,9 +107,9 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
             rows={1}
             className="
               w-full bg-[var(--bg)] border border-[var(--border-2)] rounded-lg
-              px-4 py-3 pr-12 text-sm font-mono text-terminal-text
-              placeholder-terminal-muted/40
-              focus:outline-none focus:border-terminal-green/40 focus:ring-1 focus:ring-terminal-green/15
+              px-4 py-3 pr-12 text-sm font-mono text-[var(--text)]
+              placeholder-[var(--muted-a40)]
+              focus:outline-none focus:border-[var(--green-a40)] focus:ring-1 focus:ring-[var(--green-a15)]
               resize-none min-h-[46px] max-h-[120px] overflow-y-auto
               transition-colors leading-relaxed
               disabled:opacity-40 disabled:cursor-not-allowed
@@ -129,8 +129,8 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
               className="
                 absolute right-2.5 bottom-2.5
                 p-1.5 rounded-md
-                bg-terminal-red/10 border border-terminal-red/30 text-terminal-red
-                hover:bg-terminal-red/20 transition-all
+                bg-[var(--red-a10)] border border-[var(--red-a30)] text-[var(--red)]
+                hover:bg-[var(--red-a20)] transition-all
               "
               title="Stop"
             >
@@ -145,8 +145,8 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
               className="
                 absolute right-2.5 bottom-2.5
                 p-1.5 rounded-md transition-all
-                bg-terminal-green/10 border border-terminal-green/30 text-terminal-green
-                hover:bg-terminal-green/20 hover:border-terminal-green/60
+                bg-[var(--green-a10)] border border-[var(--green-a30)] text-[var(--green)]
+                hover:bg-[var(--green-a20)] hover:border-[var(--green-a60)]
                 disabled:opacity-30 disabled:cursor-not-allowed
               "
               title="Send"
@@ -160,7 +160,7 @@ export function ChatWindow({ pendingQuery, onQueryConsumed, onWalletDetected, is
         </div>
 
         <div className="flex items-center justify-between mt-2 px-1">
-          <p className="text-[10px] font-mono text-terminal-muted/40">
+          <p className="text-[10px] font-mono text-[var(--muted-a40)]">
             Paid from your Tempo wallet · MPP session · $0.01 per request
           </p>
         </div>

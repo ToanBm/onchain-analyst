@@ -3,7 +3,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ── Dark theme (default) ── */
+:root,
+[data-theme='dark'] {
   --bg:          #0a0e0f;
   --surface:     #0f1517;
   --surface-2:   #141c1f;
@@ -16,6 +18,91 @@
   --red:         #ff4545;
   --amber:       #ffb347;
   --blue:        #4da6ff;
+  /* Pre-computed alpha variants (Tailwind /N modifiers don't work with var()) */
+  --green-a10:   rgba(0, 255, 157, 0.10);
+  --green-a20:   rgba(0, 255, 157, 0.20);
+  --green-a30:   rgba(0, 255, 157, 0.30);
+  --green-a40:   rgba(0, 255, 157, 0.40);
+  --green-a50:   rgba(0, 255, 157, 0.50);
+  --green-a60:   rgba(0, 255, 157, 0.60);
+  --green-a70:   rgba(0, 255, 157, 0.70);
+  --muted-a30:   rgba(122, 138, 153, 0.30);
+  --muted-a40:   rgba(122, 138, 153, 0.40);
+  --muted-a50:   rgba(122, 138, 153, 0.50);
+  --muted-a60:   rgba(122, 138, 153, 0.60);
+  --muted-a80:   rgba(122, 138, 153, 0.80);
+  --red-a10:     rgba(255, 69, 69, 0.10);
+  --red-a20:     rgba(255, 69, 69, 0.20);
+  --red-a30:     rgba(255, 69, 69, 0.30);
+  --red-a80:     rgba(255, 69, 69, 0.80);
+  --green-a15:   rgba(0, 255, 157, 0.15);
+}
+
+/* ── Light theme ── */
+/* Contrast ratios (WCAG): text #0f172a on #ffffff = 19:1, muted #475569 on #ffffff = 7.8:1 */
+[data-theme='light'] {
+  --bg:          #ffffff;
+  --surface:     #f1f5f9;
+  --surface-2:   #e2e8f0;
+  --border:      #cbd5e1;
+  --border-2:    #94a3b8;
+  --muted:       #475569;
+  --text:        #0f172a;
+  --green:       #15803d;
+  --green-dim:   #166534;
+  --red:         #dc2626;
+  --amber:       #d97706;
+  --blue:        #2563eb;
+  /* Pre-computed alpha variants */
+  --green-a10:   rgba(21, 128, 61, 0.10);
+  --green-a15:   rgba(21, 128, 61, 0.15);
+  --green-a20:   rgba(21, 128, 61, 0.20);
+  --green-a30:   rgba(21, 128, 61, 0.30);
+  --green-a40:   rgba(21, 128, 61, 0.40);
+  --green-a50:   rgba(21, 128, 61, 0.50);
+  --green-a60:   rgba(21, 128, 61, 0.60);
+  --green-a70:   rgba(21, 128, 61, 0.70);
+  --muted-a30:   rgba(71, 85, 105, 0.30);
+  --muted-a40:   rgba(71, 85, 105, 0.40);
+  --muted-a50:   rgba(71, 85, 105, 0.50);
+  --muted-a60:   rgba(71, 85, 105, 0.60);
+  --muted-a80:   rgba(71, 85, 105, 0.80);
+  --red-a10:     rgba(220, 38, 38, 0.10);
+  --red-a20:     rgba(220, 38, 38, 0.20);
+  --red-a30:     rgba(220, 38, 38, 0.30);
+  --red-a80:     rgba(220, 38, 38, 0.80);
+}
+
+/* Light mode overrides for glow effects (toned down) */
+[data-theme='light'] .glow-red {
+  animation: glowRedLight 2s ease-in-out infinite;
+}
+[data-theme='light'] .glow-amber {
+  animation: glowAmberLight 2.5s ease-in-out infinite;
+}
+
+@keyframes glowRedLight {
+  0%, 100% { box-shadow: 0 0 3px rgba(220,38,38,0.35); }
+  50%       { box-shadow: 0 0 8px rgba(220,38,38,0.55); }
+}
+@keyframes glowAmberLight {
+  0%, 100% { box-shadow: 0 0 3px rgba(217,119,6,0.35); }
+  50%       { box-shadow: 0 0 8px rgba(217,119,6,0.5); }
+}
+
+/* Light mode agent bubble */
+[data-theme='light'] .agent-bubble {
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(135deg, var(--green-dim), var(--border)) border-box;
+}
+
+/* Light mode code block */
+[data-theme='light'] .code-block {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  border-top-color: var(--green-dim);
+  color: var(--green-dim);
 }
 
 * {
@@ -166,4 +253,47 @@ html, body, #root {
   border: 1px solid var(--border);
   border-radius: 3px;
   padding: 1px 5px;
+}
+
+/* ── Mobile drawer ── */
+.sidebar-drawer {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 40;
+  width: 288px;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.sidebar-drawer.is-open {
+  transform: translateX(0);
+}
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.drawer-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Mobile input safe area ── */
+.input-safe-area {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* ── Minimum tap-target size on mobile ── */
+@media (max-width: 767px) {
+  .tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

@@ -6,10 +6,10 @@ interface RiskBadgeProps {
 }
 
 const RISK_CONFIG: Record<RiskLevel, { dot: string; text: string; description: string }> = {
-  LOW:      { dot: 'bg-terminal-green',  text: 'text-terminal-green',  description: 'Minimal on-chain risk signals' },
-  MEDIUM:   { dot: 'bg-terminal-amber',  text: 'text-terminal-amber',  description: 'Some patterns warrant attention' },
-  HIGH:     { dot: 'bg-terminal-red',    text: 'text-terminal-red',    description: 'Multiple active risk indicators' },
-  CRITICAL: { dot: 'bg-terminal-red',    text: 'text-terminal-red',    description: 'Immediate red flags, avoid interaction' },
+  LOW:      { dot: 'bg-[var(--green)]', text: 'text-[var(--green)]', description: 'Minimal on-chain risk signals' },
+  MEDIUM:   { dot: 'bg-[var(--amber)]', text: 'text-[var(--amber)]', description: 'Some patterns warrant attention' },
+  HIGH:     { dot: 'bg-[var(--red)]',   text: 'text-[var(--red)]',   description: 'Multiple active risk indicators' },
+  CRITICAL: { dot: 'bg-[var(--red)]',   text: 'text-[var(--red)]',   description: 'Immediate red flags, avoid interaction' },
 }
 
 export function RiskBadge({ level, score }: RiskBadgeProps) {
@@ -18,11 +18,11 @@ export function RiskBadge({ level, score }: RiskBadgeProps) {
   return (
     <span className="inline-flex items-center gap-2 font-mono text-sm">
       {score !== undefined && (
-        <span className="text-terminal-text font-bold">{score}/100</span>
+        <span className="text-[var(--text)] font-bold">{score}/100</span>
       )}
       <span className={`w-2 h-2 rounded-full shrink-0 ${cfg.dot}`} />
       <span className={`font-bold tracking-widest uppercase ${cfg.text}`}>{level}</span>
-      <span className="text-terminal-muted font-bold">{cfg.description}</span>
+      <span className="text-[var(--muted)] font-bold">{cfg.description}</span>
     </span>
   )
 }

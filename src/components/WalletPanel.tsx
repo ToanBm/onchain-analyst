@@ -3,6 +3,9 @@ import { useState } from 'react'
 interface WalletPanelProps {
   onWalletQuery: (address: string) => void
   recentQueries: string[]
+  /** Mobile drawer state */
+  isOpen: boolean
+  onClose: () => void
 }
 
 function truncate(addr: string) {
@@ -14,7 +17,7 @@ function isValidAddress(val: string) {
   return /^0x[0-9a-fA-F]{40}$/.test(val.trim())
 }
 
-export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) {
+export function WalletPanel({ onWalletQuery, recentQueries, isOpen, onClose }: WalletPanelProps) {
   const [input, setInput] = useState('')
   const [error, setError] = useState('')
 
@@ -28,26 +31,45 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
     setError('')
     onWalletQuery(addr)
     setInput('')
+    onClose()
   }
 
-  return (
-    <aside className="w-64 shrink-0 border-r border-[var(--border)] bg-[var(--surface)] flex flex-col h-full">
+  const handleQuickQuery = (q: string) => {
+    onWalletQuery(q)
+    onClose()
+  }
+
+  const panelContent = (
+    <aside className="w-full h-full border-r border-[var(--border)] bg-[var(--surface)] flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--border)]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-terminal-green animate-pulse" />
-          <span className="font-display text-xs font-semibold text-terminal-green uppercase tracking-widest">
-            On-Chain Analyst
-          </span>
+      <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[var(--green)] animate-pulse" />
+            <span className="font-display text-xs font-semibold text-[var(--green)] uppercase tracking-widest">
+              On-Chain Analyst
+            </span>
+          </div>
+          <p className="text-[10px] text-[var(--muted)] mt-1 font-mono">
+            Powered by Anthropic × Alchemy
+          </p>
         </div>
-        <p className="text-[10px] text-terminal-muted mt-1 font-mono">
-          Powered by Anthropic × Alchemy
-        </p>
+
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="md:hidden p-2 rounded text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--surface-2)] transition-colors"
+          aria-label="Close menu"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {/* Wallet input */}
       <div className="px-4 py-4 border-b border-[var(--border)]">
-        <label className="block text-[10px] text-terminal-muted uppercase tracking-widest mb-2 font-mono">
+        <label className="block text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2 font-mono">
           Analyse Wallet
         </label>
         <form onSubmit={handleSubmit}>
@@ -57,20 +79,20 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
             placeholder="0x…"
             className="
               w-full bg-[var(--bg)] border border-[var(--border-2)] rounded px-3 py-2
-              text-xs font-mono text-terminal-text placeholder-terminal-muted/50
-              focus:outline-none focus:border-terminal-green/50 focus:ring-1 focus:ring-terminal-green/20
+              text-xs font-mono text-[var(--text)] placeholder-[var(--muted-a50)]
+              focus:outline-none focus:border-[var(--green-a50)] focus:ring-1 focus:ring-[var(--green-a20)]
               transition-colors
             "
           />
           {error && (
-            <p className="text-[10px] text-terminal-red mt-1 font-mono">{error}</p>
+            <p className="text-[10px] text-[var(--red)] mt-1 font-mono">{error}</p>
           )}
           <button
             type="submit"
             className="
-              mt-2 w-full py-1.5 text-xs font-mono font-semibold uppercase tracking-widest
-              bg-terminal-green/10 border border-terminal-green/30 text-terminal-green
-              rounded hover:bg-terminal-green/20 hover:border-terminal-green/60
+              mt-2 w-full py-2 text-xs font-mono font-semibold uppercase tracking-widest
+              bg-[var(--green-a10)] border border-[var(--green-a30)] text-[var(--green)]
+              rounded hover:bg-[var(--green-a20)] hover:border-[var(--green-a60)]
               transition-all duration-150
             "
           >
@@ -81,7 +103,7 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
 
       {/* Quick prompts */}
       <div className="px-4 py-3 border-b border-[var(--border)]">
-        <p className="text-[10px] text-terminal-muted uppercase tracking-widest mb-2 font-mono">
+        <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2 font-mono">
           Quick Queries
         </p>
         {[
@@ -92,10 +114,10 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
         ].map((q) => (
           <button
             key={q}
-            onClick={() => onWalletQuery(q)}
+            onClick={() => handleQuickQuery(q)}
             className="
-              w-full text-left text-[11px] font-mono text-terminal-muted
-              py-1.5 px-2 rounded hover:bg-[var(--surface-2)] hover:text-terminal-text
+              w-full text-left text-[11px] font-mono text-[var(--muted)]
+              py-2 px-2 rounded hover:bg-[var(--surface-2)] hover:text-[var(--text)]
               transition-colors truncate
             "
           >
@@ -107,20 +129,20 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
       {/* Recent wallet queries */}
       {recentQueries.length > 0 && (
         <div className="px-4 py-3 flex-1 overflow-y-auto">
-          <p className="text-[10px] text-terminal-muted uppercase tracking-widest mb-2 font-mono">
+          <p className="text-[10px] text-[var(--muted)] uppercase tracking-widest mb-2 font-mono">
             Recent Wallets
           </p>
           {recentQueries.map((addr) => (
             <button
               key={addr}
-              onClick={() => onWalletQuery(`Analyze wallet ${addr}`)}
+              onClick={() => { onWalletQuery(`Analyze wallet ${addr}`); onClose() }}
               className="
-                w-full text-left flex items-center gap-2 py-1.5 px-2 rounded
+                w-full text-left flex items-center gap-2 py-2 px-2 rounded
                 hover:bg-[var(--surface-2)] transition-colors group
               "
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-terminal-green/40 group-hover:bg-terminal-green shrink-0" />
-              <span className="text-[11px] font-mono text-terminal-muted group-hover:text-terminal-green truncate">
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--green-a40)] group-hover:bg-[var(--green)] shrink-0" />
+              <span className="text-[11px] font-mono text-[var(--muted)] group-hover:text-[var(--green)] truncate">
                 {truncate(addr)}
               </span>
             </button>
@@ -130,12 +152,31 @@ export function WalletPanel({ onWalletQuery, recentQueries }: WalletPanelProps) 
 
       {/* MPP cost footer */}
       <div className="px-4 py-3 border-t border-[var(--border)] mt-auto">
-        <p className="text-[10px] text-terminal-muted/60 font-mono leading-relaxed">
+        <p className="text-[10px] text-[var(--muted-a60)] font-mono leading-relaxed">
           0.002 USDC / message<br />
           0.001 USDC / on-chain call<br />
-          <span className="text-terminal-green/40">via Tempo × MPP</span>
+          <span className="text-[var(--green-a40)]">via Tempo × MPP</span>
         </p>
       </div>
     </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop: static sidebar */}
+      <div className="hidden md:flex w-64 shrink-0 h-full">
+        {panelContent}
+      </div>
+
+      {/* Mobile: drawer overlay */}
+      <div
+        className={`drawer-backdrop md:hidden ${isOpen ? 'is-open' : ''}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className={`sidebar-drawer md:hidden ${isOpen ? 'is-open' : ''}`}>
+        {panelContent}
+      </div>
+    </>
   )
 }

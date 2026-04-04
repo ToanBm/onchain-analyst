@@ -44,10 +44,10 @@ export function ProgressSteps({ steps, streaming, hasContent }: ProgressStepsPro
               w-5 h-5 rounded-sm flex items-center justify-center shrink-0 text-[8px] font-bold
               transition-all duration-300
               ${step.done
-                ? 'bg-terminal-green/20 border border-terminal-green/60 text-terminal-green'
+                ? 'bg-[var(--green-a20)] border border-[var(--green-a60)] text-[var(--green)]'
                 : isActive
-                  ? 'bg-terminal-green/10 border border-terminal-green/30 text-terminal-green/70'
-                  : 'bg-transparent border border-[var(--border-2)] text-terminal-muted/30'
+                  ? 'bg-[var(--green-a10)] border border-[var(--green-a30)] text-[var(--green-a70)]'
+                  : 'bg-transparent border border-[var(--border-2)] text-[var(--muted-a30)]'
               }
             `}>
               {step.done ? (
@@ -64,10 +64,10 @@ export function ProgressSteps({ steps, streaming, hasContent }: ProgressStepsPro
             <span className={`
               text-[11px] font-mono transition-colors duration-300
               ${step.done
-                ? 'text-terminal-green'
+                ? 'text-[var(--green)]'
                 : isActive
-                  ? 'text-terminal-muted/80'
-                  : 'text-terminal-muted/30'
+                  ? 'text-[var(--muted-a80)]'
+                  : 'text-[var(--muted-a30)]'
               }
             `}>
               {label}
@@ -85,8 +85,8 @@ export function ProgressSteps({ steps, streaming, hasContent }: ProgressStepsPro
               <span className={`
                 text-[9px] font-mono px-1.5 py-0.5 rounded-sm border transition-colors duration-300
                 ${step.done
-                  ? 'border-terminal-green/30 text-terminal-green/60'
-                  : 'border-[var(--border-2)] text-terminal-muted/30'
+                  ? 'border-[var(--green-a30)] text-[var(--green-a60)]'
+                  : 'border-[var(--border-2)] text-[var(--muted-a30)]'
                 }
               `}>
                 {step.name.startsWith('alchemy') ? 'Alchemy MPP'
@@ -103,7 +103,7 @@ export function ProgressSteps({ steps, streaming, hasContent }: ProgressStepsPro
       {/* Overall progress bar */}
       <div className="mt-1 h-px bg-[var(--border-2)] rounded-full overflow-hidden">
         <div
-          className="h-full bg-terminal-green/50 rounded-full transition-all duration-500"
+          className="h-full bg-[var(--green-a50)] rounded-full transition-all duration-500"
           style={{
             width: `${Math.round((allSteps.filter((s) => s.done).length / allSteps.length) * 100)}%`,
           }}

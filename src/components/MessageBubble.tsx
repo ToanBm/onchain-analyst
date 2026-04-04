@@ -23,7 +23,7 @@ function renderContent(text: string) {
         if (part.startsWith('```') && part.endsWith('```')) {
           const inner = part.slice(3, -3).replace(/^\w+\n/, '')
           return (
-            <pre key={i} className="code-block rounded p-3 my-2 text-xs overflow-x-auto text-terminal-green/90 whitespace-pre-wrap">
+            <pre key={i} className="code-block rounded p-3 my-2 text-xs overflow-x-auto text-[var(--green)] whitespace-pre-wrap">
               <code>{inner}</code>
             </pre>
           )
@@ -62,7 +62,7 @@ export function MessageBubble({ message }: { message: Message }) {
     return (
       <div className="flex justify-end fade-up mb-4">
         <div className="max-w-[75%] bg-[var(--surface-2)] border border-[var(--border-2)] rounded-lg px-4 py-3">
-          <p className="text-sm text-terminal-text font-mono leading-relaxed">{message.content}</p>
+          <p className="text-sm text-[var(--text)] font-mono leading-relaxed">{message.content}</p>
         </div>
       </div>
     )
@@ -73,22 +73,22 @@ export function MessageBubble({ message }: { message: Message }) {
       <div className="max-w-[85%]">
         {/* Agent header */}
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-5 h-5 rounded-sm bg-terminal-green/20 border border-terminal-green/40 flex items-center justify-center">
-            <span className="text-[8px] text-terminal-green font-bold">AI</span>
+          <div className="w-5 h-5 rounded-sm bg-[var(--green-a20)] border border-[var(--green-a40)] flex items-center justify-center">
+            <span className="text-[8px] text-[var(--green)] font-bold">AI</span>
           </div>
-          <span className="text-[10px] text-terminal-muted uppercase tracking-widest font-mono">Analyst</span>
+          <span className="text-[10px] text-[var(--muted)] uppercase tracking-widest font-mono">Analyst</span>
         </div>
 
         {/* Bubble */}
-        <div className="agent-bubble relative rounded-lg px-4 py-3 text-sm font-mono leading-relaxed text-terminal-text">
+        <div className="agent-bubble relative rounded-lg px-4 py-3 text-sm font-mono leading-relaxed text-[var(--text)]">
           {!message.streaming && message.content && (
             <button
               onClick={handleCopy}
               title="Copy"
-              className="absolute top-2.5 right-2.5 text-terminal-muted/40 hover:text-terminal-green transition-colors"
+              className="absolute top-2.5 right-2.5 text-[var(--muted-a40)] hover:text-[var(--green)] transition-colors"
             >
               {copied ? (
-                <span className="text-[10px] font-mono text-terminal-green">copied!</span>
+                <span className="text-[10px] font-mono text-[var(--green)]">copied!</span>
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth="2" />
@@ -98,7 +98,7 @@ export function MessageBubble({ message }: { message: Message }) {
             </button>
           )}
           {message.error ? (
-            <span className="text-terminal-red text-xs">⚠ {message.error}</span>
+            <span className="text-[var(--red)] text-xs">⚠ {message.error}</span>
           ) : (
             <>
               {message.toolSteps && message.toolSteps.length > 0 && (
@@ -114,7 +114,7 @@ export function MessageBubble({ message }: { message: Message }) {
                   {message.streaming && <span className="cursor-blink" />}
                 </>
               ) : message.streaming && (!message.toolSteps || message.toolSteps.length === 0) && (
-                <span className="flex items-center gap-2 text-terminal-muted text-xs">
+                <span className="flex items-center gap-2 text-[var(--muted)] text-xs">
                   <span className="typing-dot" />
                   <span className="typing-dot" />
                   <span className="typing-dot" />
